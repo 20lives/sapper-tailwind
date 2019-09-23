@@ -18,109 +18,109 @@ const onwarn = (warning, onwarn) => (warning.code === 'CIRCULAR_DEPENDENCY' && /
 const dedupe = importee => importee === 'svelte' || importee.startsWith('svelte/');
 
 const postcssPlugins = [
-	require("postcss-import")(),
-	require("postcss-url")(),
-	require("tailwindcss")("./tailwind.config.js"),
-	require("autoprefixer")({
-		browserlist: "last 1 version"
-	})
+  require("postcss-import")(),
+  require("postcss-url")(),
+  require("tailwindcss")("./tailwind.config.js"),
+  require("autoprefixer")({
+    browserlist: "last 1 version"
+  })
 ]
 
 const preprocess = sveltePreprocess({
-	transformers: {
-		postcss: {
-			plugins: postcssPlugins
-		}
-	}
+  transformers: {
+    postcss: {
+      plugins: postcssPlugins
+    }
+  }
 });
 
 export default {
-	client: {
-		input: config.client.input(),
-		output: config.client.output(),
-		plugins: [
-			replace({
-				'process.browser': true,
-				'process.env.NODE_ENV': JSON.stringify(mode)
-			}),
-			svelte({
-				preprocess,
-				dev,
-				hydratable: true,
-				emitCss: true
-			}),
-			resolve({
-				browser: true,
-				dedupe
-			}),
-			commonjs(),
+  client: {
+    input: config.client.input(),
+    output: config.client.output(),
+    plugins: [
+      replace({
+        'process.browser': true,
+        'process.env.NODE_ENV': JSON.stringify(mode),
+      }),
+      svelte({
+        preprocess,
+        dev,
+        hydratable: true,
+        emitCss: true,
+      }),
+      resolve({
+        browser: true,
+        dedupe,
+      }),
+      commonjs(),
 
-			legacy && babel({
-				extensions: ['.js', '.mjs', '.html', '.svelte'],
-				runtimeHelpers: true,
-				exclude: ['node_modules/@babel/**'],
-				presets: [
-					['@babel/preset-env', {
-						targets: '> 0.25%, not dead'
-					}]
-				],
-				plugins: [
-					'@babel/plugin-syntax-dynamic-import',
-					['@babel/plugin-transform-runtime', {
-						useESModules: true
-					}]
-				]
-			}),
+      legacy && babel({
+        extensions: ['.js', '.mjs', '.html', '.svelte'],
+        runtimeHelpers: true,
+        exclude: ['node_modules/@babel/**'],
+        presets: [
+          ['@babel/preset-env', {
+            targets: '> 0.25%, not dead'
+          }]
+        ],
+        plugins: [
+          '@babel/plugin-syntax-dynamic-import',
+          ['@babel/plugin-transform-runtime', {
+            useESModules: true
+          }]
+        ]
+      }),
 
-			!dev && terser({
-				module: true
-			})
-		],
+      !dev && terser({
+        module: true,
+      })
+    ],
 
-		onwarn,
-	},
+    onwarn,
+  },
 
-	server: {
-		input: config.server.input(),
-		output: config.server.output(),
-		plugins: [
-			replace({
-				'process.browser': false,
-				'process.env.NODE_ENV': JSON.stringify(mode)
-			}),
-			svelte({
-				generate: 'ssr',
-				dev
-			}),
-			resolve({
-				dedupe
-			}),
-			postcss({
-				plugins: postcssPlugins,
-				extract: path.resolve(__dirname, './static/global.css')
-			}),
-			commonjs()
-		],
-		external: Object.keys(pkg.dependencies).concat(
-			require('module').builtinModules || Object.keys(process.binding('natives'))
-		),
+  server: {
+    input: config.server.input(),
+    output: config.server.output(),
+    plugins: [
+      replace({
+        'process.browser': false,
+        'process.env.NODE_ENV': JSON.stringify(mode),
+      }),
+      svelte({
+        generate: 'ssr',
+        dev,
+      }),
+      resolve({
+        dedupe
+      }),
+      postcss({
+        plugins: postcssPlugins,
+        extract: path.resolve(__dirname, './static/global.css'),
+      }),
+      commonjs()
+    ],
+    external: Object.keys(pkg.dependencies).concat(
+      require('module').builtinModules || Object.keys(process.binding('natives'))
+    ),
 
-		onwarn,
-	},
+    onwarn,
+  },
 
-	serviceworker: {
-		input: config.serviceworker.input(),
-		output: config.serviceworker.output(),
-		plugins: [
-			resolve(),
-			replace({
-				'process.browser': true,
-				'process.env.NODE_ENV': JSON.stringify(mode)
-			}),
-			commonjs(),
-			!dev && terser()
-		],
+  serviceworker: {
+    input: config.serviceworker.input(),
+    output: config.serviceworker.output(),
+    plugins: [
+      resolve(),
+      replace({
+        'process.browser': true,
+        'process.env.NODE_ENV': JSON.stringify(mode)
+      }),
+      commonjs(),
+      !dev && terser()
+    ],
 
-		onwarn,
-	}
+    onwarn,
+  }
 };
