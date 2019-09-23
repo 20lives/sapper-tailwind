@@ -6,6 +6,7 @@ import babel from 'rollup-plugin-babel';
 import postcss from 'rollup-plugin-postcss'
 import sveltePreprocess from 'svelte-preprocess';
 import { terser } from 'rollup-plugin-terser';
+import PurgeSvelte from "purgecss-from-svelte";
 import config from 'sapper/config/rollup.js';
 import pkg from './package.json';
 import path from 'path';
@@ -21,10 +22,19 @@ const postcssPlugins = [
   require("postcss-import")(),
   require("postcss-url")(),
   require("tailwindcss")("./tailwind.config.js"),
-  require("autoprefixer")({
-    browserlist: "last 1 version"
-  })
-]
+  require("autoprefixer")({ browserlist: "last 1 version" }),
+  require("cssnano")({preset: 'default'}),
+];
+
+const purgecss = require('@fullhuman/postcss-purgecss')({
+  content: ["./src/**/*.svelte"],
+  extractors: [
+    {
+      extractor: PurgeSvelte,
+      extensions: ["svelte"]
+    }
+  ]
+});
 
 const preprocess = sveltePreprocess({
   transformers: {
@@ -91,12 +101,13 @@ export default {
       svelte({
         generate: 'ssr',
         dev,
+        preprocess,
       }),
       resolve({
         dedupe
       }),
       postcss({
-        plugins: postcssPlugins,
+        plugins: [ ...postcssPlugins, !dev && purgecss],
         extract: path.resolve(__dirname, './static/global.css'),
       }),
       commonjs()
