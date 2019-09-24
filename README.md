@@ -1,15 +1,12 @@
-# sapper-template
+# sapper-tailwind-template
 
-The default [Sapper](https://github.com/sveltejs/sapper) template, with branches for Rollup and webpack. To clone it and get started:
+This [Sapper](https://github.com/sveltejs/sapper) template also bundled with tailwind and additional postcss plugins. To clone it and get started:
 
 ```bash
-# for Rollup
-npx degit "sveltejs/sapper-template#rollup" my-app
-# for webpack
-npx degit "sveltejs/sapper-template#webpack" my-app
+npx degit "20lives/sapper-tailwind-template" my-app
 cd my-app
-npm install # or yarn!
-npm run dev
+or yarn
+yarn dev
 ```
 
 Open up [localhost:3000](http://localhost:3000) and start clicking around.
